@@ -2,7 +2,7 @@ import javax.swing.*;
 import java.awt.*;
 
 /**
- * File that controls the whole program; stitches everything together.
+ * File that controls the program; stitches everything together.
  * @author Aiden Rodriguez - GH Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
  * @version 1.0
