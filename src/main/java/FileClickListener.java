@@ -16,22 +16,22 @@ public class FileClickListener implements ActionListener {
     public void actionPerformed(ActionEvent e) {
         File file = extractFileFromEvent(e);
         if (file == null || !file.isFile()) {
-            Blackboard.setStatusBarMessage("No file associated with this item.");
+            Blackboard.getInstance().setStatusBarMessage("No file associated with this item.");
             return;
         }
 
         try {
             FileAnalyzer.AnalysisResult r = FileAnalyzer.analyze(file);
 
-            Blackboard.setStatusBarMessage(r.toStatusMessage());
+            Blackboard.getInstance().setStatusBarMessage(r.toStatusMessage());
 
-            Blackboard.setCurrentLinesInFile(r.lineCount);
-            Blackboard.setCurrentControlStatementsInFile(r.ifCount + r.switchCount + r.forCount + r.whileCount);
-            Blackboard.setIsAuthorInFile(r.hasAuthor);
-            Blackboard.setIsVersionInFile(r.hasVersion);
+            Blackboard.getInstance().setCurrentLinesInFile(r.lineCount);
+            Blackboard.getInstance().setCurrentControlStatementsInFile(r.ifCount + r.switchCount + r.forCount + r.whileCount);
+            Blackboard.getInstance().setIsAuthorInFile(r.hasAuthor);
+            Blackboard.getInstance().setIsVersionInFile(r.hasVersion);
 
         } catch (Exception ex) {
-            Blackboard.setStatusBarMessage("Error reading " + file.getName() + ": " + ex.getMessage());
+            Blackboard.getInstance().setStatusBarMessage("Error reading " + file.getName() + ": " + ex.getMessage());
         }
     }
 

@@ -52,12 +52,12 @@ public class Main extends JFrame{
         setLayout(layout);
 
         FileGrid fileGrid = new FileGrid();
-        Blackboard.fileGrid = fileGrid;
+        Blackboard.getInstance().setFileGrid(fileGrid);
         add(fileGrid, BorderLayout.WEST);
 
         StatusBar statusBar = new StatusBar();
-        Blackboard.statusBar = statusBar;
-        add (statusBar, BorderLayout.SOUTH);
+        Blackboard.getInstance().setStatusBar(statusBar);
+        add(statusBar, BorderLayout.SOUTH);
 
         GraphicsPanel graphics = new GraphicsPanel();
         add(graphics, BorderLayout.CENTER);

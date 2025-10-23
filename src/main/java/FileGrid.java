@@ -34,7 +34,7 @@ public class FileGrid extends JPanel {
     public void populateFromDirectory(File dir) {
         listPanel.removeAll();
         if (dir == null || !dir.isDirectory()) {
-            Blackboard.setStatusBarMessage("Not a directory: " + dir);
+            Blackboard.getInstance().setStatusBarMessage("Not a directory: " + dir);
             revalidate(); repaint();
             return;
         }
@@ -51,7 +51,7 @@ public class FileGrid extends JPanel {
             listPanel.add(btn);
         }
 
-        Blackboard.setStatusBarMessage("Loaded " + files.length + " files from " + dir.getName());
+        Blackboard.getInstance().setStatusBarMessage("Loaded " + files.length + " files from " + dir.getName());
         listPanel.revalidate();
         listPanel.repaint();
     }

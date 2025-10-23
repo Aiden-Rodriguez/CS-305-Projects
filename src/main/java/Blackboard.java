@@ -1,3 +1,5 @@
+import java.io.File;
+
 /**
  * Class that holds shared global variables
  * accessible throughout the application.
@@ -7,49 +9,76 @@
  */
 public class Blackboard {
 
-    private static String statusMessage = "Status Bar";
-    public static StatusBar statusBar;
-    public static FileGrid fileGrid;
+    private static Blackboard instance;
 
+    private Blackboard() { }
 
-    public static long MaxLinesInFile;
-    public static long MaxControlStatementsInFile;
+    public static synchronized Blackboard getInstance() {
+        if (instance == null) {
+            instance = new Blackboard();
+        }
+        return instance;
+    }
 
-    public static long CurrentLinesInFile;
-    public static long CurrentControlStatementsInFile;
+    private String statusMessage = "Status Bar";
+    private StatusBar statusBar;
+    private FileGrid fileGrid;
 
-    public static Boolean IsAuthorInFile;
-    public static Boolean IsVersionInFile;
+    private long maxLinesInFile;
+    private long maxControlStatementsInFile;
 
-    public static void setStatusBarMessage(String message) {
-        statusMessage = message;
+    private long currentLinesInFile;
+    private long currentControlStatementsInFile;
+
+    private Boolean isAuthorInFile;
+    private Boolean isVersionInFile;
+
+    // Getters and Setters
+    public void setStatusBarMessage(String message) {
+        this.statusMessage = message;
         if (statusBar != null) {
             statusBar.setMessage(message);
         }
     }
 
-    public static void setMaxLinesInFile(long maxLinesInFile) {
-        MaxLinesInFile = maxLinesInFile;
-    }
-    public static void setMaxControlStatementsInFile(long maxControlStatementsInFile) {
-        MaxControlStatementsInFile = maxControlStatementsInFile;
-    }
-
-    public static void setCurrentLinesInFile(long currentLinesInFile) {
-        CurrentLinesInFile = currentLinesInFile;
-    }
-    public static void setCurrentControlStatementsInFile(long currentControlStatementsInFile) {
-        CurrentControlStatementsInFile = currentControlStatementsInFile;
-    }
-
-    public static void setIsAuthorInFile(Boolean isAuthorInFile) {
-        IsAuthorInFile = isAuthorInFile;
-    }
-    public static void setIsVersionInFile(Boolean isVersionInFile) {
-        IsVersionInFile = isVersionInFile;
-    }
-
-    public static String getStatusBarMessage() {
+    public String getStatusBarMessage() {
         return statusMessage;
     }
+
+    public void setStatusBar(StatusBar statusBar) {
+        this.statusBar = statusBar;
+    }
+
+    public void setFileGrid(FileGrid fileGrid) {
+        this.fileGrid = fileGrid;
+    }
+
+    public void setMaxLinesInFile(long maxLinesInFile) {
+        this.maxLinesInFile = maxLinesInFile;
+    }
+
+    public void setMaxControlStatementsInFile(long maxControlStatementsInFile) {
+        this.maxControlStatementsInFile = maxControlStatementsInFile;
+    }
+
+    public void setCurrentLinesInFile(long currentLinesInFile) {
+        this.currentLinesInFile = currentLinesInFile;
+    }
+
+    public void setCurrentControlStatementsInFile(long currentControlStatementsInFile) {
+        this.currentControlStatementsInFile = currentControlStatementsInFile;
+    }
+
+    public void setIsAuthorInFile(Boolean isAuthorInFile) {
+        this.isAuthorInFile = isAuthorInFile;
+    }
+
+    public void setIsVersionInFile(Boolean isVersionInFile) {
+        this.isVersionInFile = isVersionInFile;
+    }
+
+    public FileGrid getFileGrid() {
+        return fileGrid;
+    }
+
 }

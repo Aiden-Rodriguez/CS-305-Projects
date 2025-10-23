@@ -25,35 +25,35 @@ public class ToolBarListener implements ActionListener {
                 int result = chooser.showOpenDialog(null);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File dir = chooser.getSelectedFile();
-                    if (Blackboard.fileGrid != null) {
-                        Blackboard.fileGrid.populateFromDirectory(dir);
+                    if (Blackboard.getInstance().getFileGrid() != null) {
+                        Blackboard.getInstance().getFileGrid().populateFromDirectory(dir);
                     } else {
-                        Blackboard.setStatusBarMessage("FileGrid not initialized.");
+                        Blackboard.getInstance().setStatusBarMessage("FileGrid not initialized.");
                     }
                 } else {
-                    Blackboard.setStatusBarMessage("Open canceled");
+                    Blackboard.getInstance().setStatusBarMessage("Open canceled");
                 }
                 break;
             }
 
             case "Exit":
-                Blackboard.setStatusBarMessage("Exiting…");
+                Blackboard.getInstance().setStatusBarMessage("Exiting…");
                 System.exit(0);
                 break;
 
             case "Action":
-                Blackboard.setStatusBarMessage("Action clicked");
+                Blackboard.getInstance().setStatusBarMessage("Action clicked");
                 break;
 
             case "About":
-                Blackboard.setStatusBarMessage("About");
+                Blackboard.getInstance().setStatusBarMessage("About");
                 JOptionPane.showMessageDialog(null,
                         "Assignment 01\nAuthors: Aiden Rodriguez & Brandon Powell",
                         "About", JOptionPane.INFORMATION_MESSAGE);
                 break;
 
             default:
-                Blackboard.setStatusBarMessage("Unknown: " + cmd);
+                Blackboard.getInstance().setStatusBarMessage("Unknown: " + cmd);
         }
     }
 }
