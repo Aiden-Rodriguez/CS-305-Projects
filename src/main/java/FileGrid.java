@@ -24,8 +24,8 @@ public class FileGrid extends JPanel {
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         add(scrollPane, BorderLayout.CENTER);
-    }
 
+    }
     @Override
     public Dimension getPreferredSize() {
         return new Dimension(200, 0);
@@ -54,5 +54,42 @@ public class FileGrid extends JPanel {
         Blackboard.getInstance().setStatusBarMessage("Loaded " + files.length + " files from " + dir.getName());
         listPanel.revalidate();
         listPanel.repaint();
+
+        computeAndApplyDirectoryMaximaAsync(files);
+    }
+
+    private void computeAndApplyDirectoryMaximaAsync(File[] files) {
+        new SwingWorker<long[], Void>() {
+            @Override
+            protected long[] doInBackground() {
+                long maxLines = 1;
+                long maxCtrls = 1;
+
+                for (File f : files) {
+                    try {
+                        FileAnalyzer.AnalysisResult r = FileAnalyzer.analyze(f);
+                        long ctrl = r.ifCount + r.switchCount + r.forCount + r.whileCount;
+                        if (r.lineCount > maxLines) maxLines = r.lineCount;
+                        if (ctrl > maxCtrls) maxCtrls = ctrl;
+                    } catch (Exception ex) {
+
+                    }
+                }
+                return new long[]{maxLines, maxCtrls};
+            }
+
+            @Override
+            protected void done() {
+                try {
+                    long[] res = get();
+                    Blackboard bb = Blackboard.getInstance();
+                    bb.setMaxLinesInFile(res[0]);
+                    bb.setMaxControlStatementsInFile(res[1]);
+
+                } catch (Exception ex) {
+                    Blackboard.getInstance().setStatusBarMessage("Error computing maxima: " + ex.getMessage());
+                }
+            }
+        }.execute();
     }
 }

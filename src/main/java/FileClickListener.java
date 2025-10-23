@@ -27,8 +27,11 @@ public class FileClickListener implements ActionListener {
 
             Blackboard.getInstance().setCurrentLinesInFile(r.lineCount);
             Blackboard.getInstance().setCurrentControlStatementsInFile(r.ifCount + r.switchCount + r.forCount + r.whileCount);
-            Blackboard.getInstance().setIsAuthorInFile(r.hasAuthor);
-            Blackboard.getInstance().setIsVersionInFile(r.hasVersion);
+
+            Blackboard bb = Blackboard.getInstance();
+            bb.setIsAuthorInFile(r.hasAuthor);
+            bb.setIsVersionInFile(r.hasVersion);
+            bb.updateOverallMoodImage();
 
         } catch (Exception ex) {
             Blackboard.getInstance().setStatusBarMessage("Error reading " + file.getName() + ": " + ex.getMessage());

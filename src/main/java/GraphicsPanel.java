@@ -13,40 +13,29 @@ public class GraphicsPanel extends JPanel {
     public GraphicsPanel() {
         setLayout(new GridLayout(2, 3));
 
-        JLabel complexityTitle = new JLabel("Complexity");
-        JLabel sizeTitle = new JLabel("Size");
-        JLabel overallTitle = new JLabel("Overall");
-
-        complexityTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        sizeTitle.setHorizontalAlignment(SwingConstants.CENTER);
-        overallTitle.setHorizontalAlignment(SwingConstants.CENTER);
+        JLabel complexityTitle = new JLabel("Complexity", SwingConstants.CENTER);
+        JLabel sizeTitle       = new JLabel("Size",       SwingConstants.CENTER);
+        JLabel overallTitle    = new JLabel("Overall",    SwingConstants.CENTER);
 
         add(complexityTitle);
         add(sizeTitle);
         add(overallTitle);
 
-        RectanglePanel complexityGraphic = new RectanglePanel(Color.RED, 200, 200);
-        RectanglePanel sizeGraphic = new RectanglePanel(Color.BLUE, 200, 120);
-        JPanel overallGraphic = new CirclePanel(Color.YELLOW);
+        RectanglePanel sizePanel = new RectanglePanel(Color.BLUE, 30, 0);
+        RectanglePanel complexityPanel = new RectanglePanel(Color.RED, 30, 0);
 
-        add(complexityGraphic);
-        add(sizeGraphic);
+        Blackboard bb = Blackboard.getInstance();
+        bb.setSizePanel(sizePanel);
+        bb.setComplexityPanel(complexityPanel);
+
+        add(sizePanel);
+        add(complexityPanel);
+
+        ImagePanel overallGraphic = new ImagePanel("/neutral.png");
+        bb.setOverallImagePanel(overallGraphic);
         add(overallGraphic);
-    }
 
-    private static class CirclePanel extends JPanel {
-        private final Color color;
-
-        public CirclePanel(Color color) {
-            this.color = color;
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setColor(color);
-            int diameter = Math.min(getWidth(), getHeight()) - 20;
-            g.fillOval((getWidth() - diameter) / 2, (getHeight() - diameter) / 2, diameter, diameter);
-        }
+        revalidate();
+        repaint();
     }
 }
