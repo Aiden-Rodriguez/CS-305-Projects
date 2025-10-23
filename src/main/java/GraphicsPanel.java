@@ -25,8 +25,8 @@ public class GraphicsPanel extends JPanel {
         add(sizeTitle);
         add(overallTitle);
 
-        JPanel complexityGraphic = new RectanglePanel(Color.RED);
-        JPanel sizeGraphic = new RectanglePanel(Color.BLUE);
+        RectanglePanel complexityGraphic = new RectanglePanel(Color.RED, 200, 200);
+        RectanglePanel sizeGraphic = new RectanglePanel(Color.BLUE, 200, 120);
         JPanel overallGraphic = new CirclePanel(Color.YELLOW);
 
         add(complexityGraphic);
@@ -49,22 +49,4 @@ public class GraphicsPanel extends JPanel {
             g.fillOval((getWidth() - diameter) / 2, (getHeight() - diameter) / 2, diameter, diameter);
         }
     }
-
-    private static class RectanglePanel extends JPanel {
-        private final Color color;
-
-        public RectanglePanel(Color color) {
-            this.color = color;
-        }
-
-        @Override
-        protected void paintComponent(Graphics g) {
-            super.paintComponent(g);
-            g.setColor(color);
-            int width = getWidth() - 20;
-            int height = getHeight() - 20;
-            g.fillRect(10, 10, width, height);
-        }
-    }
-
 }
