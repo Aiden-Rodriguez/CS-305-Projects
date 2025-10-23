@@ -56,6 +56,31 @@ public class FileGrid extends JPanel {
         listPanel.repaint();
 
         computeAndApplyDirectoryMaximaAsync(files);
+
+        if (files.length > 0) {
+            analyzeFirstFile(files[0]);
+        }
+    }
+
+    private void analyzeFirstFile(File firstFile) {
+        try {
+            FileAnalyzer.AnalysisResult r = FileAnalyzer.analyze(firstFile);
+
+            Blackboard bb = Blackboard.getInstance();
+            bb.setStatusBarMessage(r.toStatusMessage());
+            bb.setCurrentLinesInFile(r.lineCount);
+            bb.setCurrentControlStatementsInFile(
+                    r.ifCount + r.switchCount + r.forCount + r.whileCount
+            );
+            bb.setIsAuthorInFile(r.hasAuthor);
+            bb.setIsVersionInFile(r.hasVersion);
+            bb.updateOverallMoodImage();
+
+        } catch (Exception ex) {
+            Blackboard.getInstance().setStatusBarMessage(
+                    "Error analyzing first file (" + firstFile.getName() + "): " + ex.getMessage()
+            );
+        }
     }
 
     private void computeAndApplyDirectoryMaximaAsync(File[] files) {

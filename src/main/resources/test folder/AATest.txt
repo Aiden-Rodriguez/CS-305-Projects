@@ -1,0 +1,6 @@
+FOR
+WHILE
+ELSE
+SWITCH
+@author abs
+@version 0.10
