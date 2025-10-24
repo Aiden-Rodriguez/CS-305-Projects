@@ -1,11 +1,12 @@
-import javiergs.tulip.GitHubHandler;
-
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
-import java.io.IOException;
-import java.util.List;
+
+/**
+ * File that controls the program; Program displays path contents.
+ * @author Aiden Rodriguez
+ * @author Brandon Powell - GH - Bpowell5184
+ * @version 1.0
+ */
 
 public class Main extends JFrame {
 

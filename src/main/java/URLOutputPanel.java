@@ -2,6 +2,12 @@ import javax.swing.*;
 import java.awt.*;
 import java.util.List;
 
+/**
+ * File that displays URL path contents.
+ * @author Aiden Rodriguez
+ * @author Brandon Powell - GH - Bpowell5184
+ * @version 1.0
+ */
 public class URLOutputPanel extends JPanel {
     private JTextArea outputArea;
 

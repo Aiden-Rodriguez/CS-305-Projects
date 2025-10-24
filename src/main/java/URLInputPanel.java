@@ -7,6 +7,13 @@ import java.awt.event.ActionListener;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ * File that controls the input panel;
+ * Responsible for user input and interaction
+ * @author Aiden Rodriguez
+ * @author Brandon Powell - GH - Bpowell5184
+ * @version 1.0
+ */
 public class URLInputPanel extends JPanel implements ActionListener {
     private JTextField urlField;
     private JButton openButton;
