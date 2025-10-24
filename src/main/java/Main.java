@@ -1,16 +1,27 @@
+import javiergs.tulip.GitHubHandler;
+
 import javax.swing.*;
 import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.List;
 
 /**
- * File that controls the program; stitches everything together.
+ * Class that displays files in specified path
  * @author Aiden Rodriguez - GH Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
  * @version 1.0
  */
 
-public class Main extends JFrame{
+public class Main extends JFrame implements ActionListener {
 
-    public static void main(String[] args) {
+    public static String token = "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";
+
+    private JTextField urlField;
+    private JTextArea outputArea;
+
+    public static void main(String[] args) throws IOException {
         Main main = new Main();
         main.pack();
         main.setSize(600, 400);
@@ -19,47 +30,66 @@ public class Main extends JFrame{
         main.setVisible(true);
     }
 
-    public Main() {
-        JMenuBar menuBar = new JMenuBar();
-        JMenu fileMenu = new JMenu("File");
-        JMenu actionMenu = new JMenu("Action");
-        JMenu helpMenu = new JMenu("Help");
+    public Main(){
+        JPanel inputPanel = new JPanel();
+        inputPanel.setLayout(new BorderLayout());
+        urlField = new JTextField("https://github.com/CSC3100/Tool-Maven/tree/main");
+        JButton openButton = new JButton("Open");
 
-        ToolBarListener tbListener = new ToolBarListener();
+        inputPanel.add(new JLabel("Enter GitHub URL: "), BorderLayout.WEST);
+        inputPanel.add(urlField, BorderLayout.CENTER);
+        inputPanel.add(openButton, BorderLayout.EAST);
 
-        JMenuItem openMenuItem = new JMenuItem("Open");
-        openMenuItem.addActionListener(tbListener);
-        JMenuItem exitMenuItem = new JMenuItem("Exit");
-        exitMenuItem.addActionListener(tbListener);
-        JMenuItem actionMenuItem = new JMenuItem("Action");
-        actionMenuItem.addActionListener(tbListener);
-        JMenuItem aboutMenuItem = new JMenuItem("About");
-        aboutMenuItem.addActionListener(tbListener);
+        outputArea = new JTextArea();
+        outputArea.setEditable(false);
+        JScrollPane scrollPane = new JScrollPane(outputArea);
 
-        fileMenu.add(openMenuItem);
-        fileMenu.addSeparator();
-        fileMenu.add(exitMenuItem);
-        actionMenu.add(actionMenuItem);
-        helpMenu.add(aboutMenuItem);
+        add(inputPanel, BorderLayout.NORTH);
+        add(scrollPane, BorderLayout.CENTER);
 
-        menuBar.add(fileMenu);
-        menuBar.add(actionMenu);
-        menuBar.add(helpMenu);
+        openButton.addActionListener(this);
+    }
 
-        setJMenuBar(menuBar);
 
-        BorderLayout layout = new BorderLayout();
-        setLayout(layout);
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String url = urlField.getText().trim();
 
-        FileGrid fileGrid = new FileGrid();
-        Blackboard.fileGrid = fileGrid;
-        add(fileGrid, BorderLayout.WEST);
+        if (url.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Please enter a GitHub URL",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
 
-        StatusBar statusBar = new StatusBar();
-        Blackboard.statusBar = statusBar;
-        add (statusBar, BorderLayout.SOUTH);
+        try {
+            GitHubHandler gh = new GitHubHandler(token);
+            List<String> files = gh.listFilesRecursive(url);
 
-        GraphicsPanel graphics = new GraphicsPanel();
-        add(graphics, BorderLayout.CENTER);
+            // Display results
+            StringBuilder sb = new StringBuilder();
+            sb.append("Files found: ").append(files.size()).append("\n\n");
+            for (String file : files) {
+                sb.append(file).append("\n");
+            }
+            outputArea.setText(sb.toString());
+
+        } catch (IOException ex) {
+            outputArea.setText("IO Error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Failed to fetch files:\n" + ex.getMessage(),
+                    "IO Error",
+                    JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+
+        } catch (Exception ex) {
+            outputArea.setText("Error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "An error occurred:\n" + ex.getMessage(),
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
     }
 }
