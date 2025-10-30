@@ -56,12 +56,8 @@ public class Main extends JFrame{
         BorderLayout layout = new BorderLayout();
         setLayout(layout);
 
-        JPanel topBar = new JPanel();
-        JTextField folderUrl = new JTextField("GitHub Folder URL");
-        JButton okURL = new JButton("OK");
-
-        JPanel centerPanel = new JPanel();
-        JTextArea testField = new JTextArea("Test Area");
+        CenterPanel centerPanel = new CenterPanel();
+        TopBar topBar = new TopBar(centerPanel);
 
         JPanel bottomPanel = new JPanel();
 
@@ -70,12 +66,6 @@ public class Main extends JFrame{
         JTextField fileName = new JTextField("text");
 
         StatusBar statusBar = new StatusBar();
-
-        topBar.setLayout(new BorderLayout());
-        topBar.add(folderUrl, BorderLayout.WEST);
-        topBar.add(okURL, BorderLayout.EAST);
-
-        centerPanel.add(testField);
 
         bottomArea.setLayout(new BorderLayout());
         bottomArea.add(selectedFile, BorderLayout.WEST);
