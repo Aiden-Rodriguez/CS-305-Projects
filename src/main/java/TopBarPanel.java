@@ -55,6 +55,33 @@ public class TopBarPanel extends JPanel implements ActionListener {
         return showingPlaceholder ? "" : urlField.getText().trim();
     }
 
+    public static String getFileName(String pathOrUrl) {
+        if (pathOrUrl == null || pathOrUrl.isEmpty()) {
+            throw new IllegalArgumentException("Input cannot be null or empty");
+        }
+
+        // Remove any trailing slashes
+        String trimmed = pathOrUrl.replaceAll("/+$", "");
+
+        // Split by forward slash and return the last piece
+        int lastSlash = trimmed.lastIndexOf('/');
+        if (lastSlash == -1) return trimmed; // no slash present
+        return trimmed.substring(lastSlash + 1);
+    }
+    public static String convertTreeToBlobUrl(String url) {
+        if (url == null || url.isEmpty()) {
+            throw new IllegalArgumentException("URL cannot be null or empty");
+        }
+
+        // Only process GitHub URLs that contain /tree/
+        if (url.contains("github.com/") && url.contains("/tree/")) {
+            return url.replace("/tree/", "/blob/");
+        }
+
+        // Return unchanged if already in blob form or not GitHub
+        return url;
+    }
+
     @Override
     public void actionPerformed(ActionEvent e) {
         String url = urlField.getText().trim();
@@ -68,7 +95,16 @@ public class TopBarPanel extends JPanel implements ActionListener {
         } else {
             FileHandler.getFileList(url);
             FileHandler.getFile("https://github.com/CSC3100/Tool-Maven/blob/main/src/main/java/javiergs/Main.java");
+            List <String> fileList = FileHandler.getFileList(url);
+            //https://github.com/Aiden-Rodriguez/CS-305-Projects/tree/main/src/main/java
+            url = convertTreeToBlobUrl(url);
+            String url_to_use_test = url + '/' +getFileName(fileList.get(2));
+            System.out.println(url_to_use_test);
+            System.out.println(getFileName(fileList.get(2)));
+            System.out.println(FileHandler.getFile(url_to_use_test));
         }
     }
 }
+
+
 
