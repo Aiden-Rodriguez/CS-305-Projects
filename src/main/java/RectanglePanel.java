@@ -7,6 +7,7 @@ import java.awt.*;
  * @author Aiden Rodriguez - GH Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
  * @version 1.0
+ *
  */
 public class RectanglePanel extends JPanel {
     private final Color color;

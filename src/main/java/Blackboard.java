@@ -5,7 +5,7 @@ import javax.swing.*;
  * accessible throughout the application.
  * @author Aiden Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
- * @version 1.0
+ * @version 1.1
  */
 public class Blackboard {
 
@@ -68,6 +68,9 @@ public class Blackboard {
 
     public void setStatusBar(StatusBar statusBar) {
         this.statusBar = statusBar;
+        if (statusBar != null) {
+            statusBar.setMessage(statusMessage);
+        }
     }
 
     public void setFileGrid(FileGrid fileGrid) {

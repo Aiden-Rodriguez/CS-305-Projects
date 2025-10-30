@@ -5,17 +5,21 @@ import java.awt.*;
  * File that controls the program; stitches everything together.
  * @author Aiden Rodriguez - GH Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
- * @version 1.0
+ * @version 1.1
  */
 
 public class Main extends JFrame{
 
+    private final TopBarPanel topBar = new TopBarPanel();
+    private final GridPanel grid = new GridPanel(12, 7, 42);
+    private final BottomStatusPanel bottom = new BottomStatusPanel();
+
     public static void main(String[] args) {
         Main main = new Main();
         main.pack();
-        main.setSize(600, 400);
+        main.setSize(550, 450);
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        main.setTitle("Assignment 01");
+        main.setTitle("Assignment 02");
         main.setVisible(true);
     }
 
@@ -48,18 +52,24 @@ public class Main extends JFrame{
 
         setJMenuBar(menuBar);
 
-        BorderLayout layout = new BorderLayout();
-        setLayout(layout);
+        setLayout(new BorderLayout());
 
-        FileGrid fileGrid = new FileGrid();
-        Blackboard.getInstance().setFileGrid(fileGrid);
-        add(fileGrid, BorderLayout.WEST);
+        add(topBar, BorderLayout.NORTH);
+
+        JPanel gridHolder = new JPanel(new BorderLayout());
+        gridHolder.add(grid, BorderLayout.CENTER);
+        add(gridHolder, BorderLayout.CENTER);
 
         StatusBar statusBar = new StatusBar();
-        Blackboard.getInstance().setStatusBar(statusBar);
-        add(statusBar, BorderLayout.SOUTH);
+        JPanel southStack = new JPanel(new BorderLayout());
+        southStack.add(bottom, BorderLayout.CENTER);
+        southStack.add(statusBar, BorderLayout.SOUTH);
+        add(southStack, BorderLayout.SOUTH);
 
-        GraphicsPanel graphics = new GraphicsPanel();
-        add(graphics, BorderLayout.CENTER);
+        topBar.setOnOk(url -> System.out.println("OK clicked, URL = " + url));
+        grid.setOnCellClicked((row, col) -> bottom.setSelectedName("r" + row + "_c" + col));
+
+        Blackboard bb = Blackboard.getInstance();
+        bb.setStatusBar(statusBar);
     }
 }
