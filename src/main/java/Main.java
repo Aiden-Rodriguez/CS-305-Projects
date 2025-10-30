@@ -70,7 +70,7 @@ public class Main extends JFrame{
         southStack.add(statusBar, BorderLayout.SOUTH);
         add(southStack, BorderLayout.SOUTH);
 
-        topBar.setOnOk(url -> System.out.println("OK clicked, URL = " + url));
+        //topBar.setOnOk(url -> System.out.println("OK clicked, URL = " + url));
         grid.setOnCellClicked((row, col) -> bottom.setSelectedName("r" + row + "_c" + col));
 
         Blackboard bb = Blackboard.getInstance();

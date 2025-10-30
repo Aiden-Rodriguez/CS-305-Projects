@@ -25,11 +25,11 @@ public class ToolBarListener implements ActionListener {
                 int result = chooser.showOpenDialog(null);
                 if (result == JFileChooser.APPROVE_OPTION) {
                     File dir = chooser.getSelectedFile();
-                    if (Blackboard.getInstance().getFileGrid() != null) {
+                    /*if (Blackboard.getInstance().getFileGrid() != null) {
                         Blackboard.getInstance().getFileGrid().populateFromDirectory(dir);
                     } else {
                         Blackboard.getInstance().setStatusBarMessage("FileGrid not initialized.");
-                    }
+                    }*/
                 } else {
                     Blackboard.getInstance().setStatusBarMessage("Open canceled");
                 }

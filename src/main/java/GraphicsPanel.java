@@ -31,10 +31,6 @@ public class GraphicsPanel extends JPanel {
         add(sizePanel);
         add(complexityPanel);
 
-        ImagePanel overallGraphic = new ImagePanel("/neutral.png");
-        bb.setOverallImagePanel(overallGraphic);
-        add(overallGraphic);
-
         revalidate();
         repaint();
     }

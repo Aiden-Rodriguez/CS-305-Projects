@@ -22,7 +22,6 @@ public class Blackboard {
 
     private String statusMessage = "Status Bar";
     private StatusBar statusBar;
-    private FileGrid fileGrid;
 
     private RectanglePanel complexityPanel;
     private RectanglePanel sizePanel;
@@ -35,31 +34,12 @@ public class Blackboard {
 
     private Boolean isAuthorInFile;
     private Boolean isVersionInFile;
-    private ImagePanel overallImagePanel;
 
     public void setStatusBarMessage(String message) {
         this.statusMessage = message;
         if (statusBar != null) {
             statusBar.setMessage(message);
         }
-    }
-
-    public void setOverallImagePanel(ImagePanel panel) {
-        this.overallImagePanel = panel;
-    }
-    public void updateOverallMoodImage() {
-        if (overallImagePanel == null) return;
-
-        String path;
-        if (Boolean.TRUE.equals(isAuthorInFile) && Boolean.TRUE.equals(isVersionInFile)) {
-            path = "/happy.png";
-        } else if (Boolean.TRUE.equals(isAuthorInFile) || Boolean.TRUE.equals(isVersionInFile)) {
-            path = "/neutral.png";
-        } else {
-            path = "/sad.png";
-        }
-
-        overallImagePanel.setImage(path);
     }
 
     public String getStatusBarMessage() {
@@ -71,10 +51,6 @@ public class Blackboard {
         if (statusBar != null) {
             statusBar.setMessage(statusMessage);
         }
-    }
-
-    public void setFileGrid(FileGrid fileGrid) {
-        this.fileGrid = fileGrid;
     }
 
     public void setMaxLinesInFile(long maxLinesInFile) {
@@ -116,7 +92,4 @@ public class Blackboard {
         this.isVersionInFile = isVersionInFile;
     }
 
-    public FileGrid getFileGrid() {
-        return fileGrid;
-    }
 }

@@ -1,5 +1,9 @@
+import javiergs.tulip.GitHubHandler;
+
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
+import java.util.List;
 import javax.swing.*;
 
 /**
@@ -9,14 +13,12 @@ import javax.swing.*;
  * @version 1.0
  */
 
-public class TopBarPanel extends JPanel {
-
-    public interface OnOkListener { void onOk(String urlText); }
+public class TopBarPanel extends JPanel implements ActionListener {
 
     private final JTextField urlField = new JTextField("GitHub Folder URL");
     private final JButton okButton = new JButton("OK");
-    private OnOkListener listener;
     private boolean showingPlaceholder = true;
+    private String token;
 
     public TopBarPanel() {
         super(new GridBagLayout());
@@ -45,13 +47,57 @@ public class TopBarPanel extends JPanel {
             }
         });
 
-        okButton.addActionListener(ae -> {
-            if (listener != null) listener.onOk(getUrlText());
-        });
+        okButton.addActionListener(this);
     }
 
     public String getUrlText() {
         return showingPlaceholder ? "" : urlField.getText().trim();
     }
-    public void setOnOk(OnOkListener l) { this.listener = l; }
+
+    @Override
+    public void actionPerformed(ActionEvent e) {
+        String url = urlField.getText().trim();
+
+        if (url.isEmpty()) {
+            JOptionPane.showMessageDialog(this,
+                    "Please enter a GitHub URL",
+                    "Error",
+                    JOptionPane.ERROR_MESSAGE);
+            return;
+        }
+
+        try {
+            GitHubHandler gh = new GitHubHandler(token);
+            List<String> files = gh.listFilesRecursive(url);
+            //centerPanel.displayFiles(files);
+
+        } catch (IOException ex) {
+            //centerPanel.displayError("IO Error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "Failed to fetch files:\n" + ex.getMessage(), "IO Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+
+        } catch (Exception ex) {
+            //centerPanel.displayError("Error: " + ex.getMessage());
+            JOptionPane.showMessageDialog(this,
+                    "An error occurred:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
+            ex.printStackTrace();
+        }
+    }
+
+    /*
+    public void displayFiles(List<String> files) {
+        StringBuilder sb = new StringBuilder();
+        sb.append("Files found: ").append(files.size()).append("\n\n");
+        for (String file : files) {
+            sb.append(file).append("\n");
+        }
+        testField.setText(sb.toString());
+    }
+
+    public void displayError(String errorMessage) {
+        testField.setText(errorMessage);
+    }
+     */
 }
+
