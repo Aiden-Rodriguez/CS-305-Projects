@@ -2,6 +2,7 @@ import javiergs.tulip.GitHubHandler;
 
 import java.awt.*;
 import java.awt.event.*;
+import java.io.File;
 import java.io.IOException;
 import java.util.List;
 import javax.swing.*;
@@ -64,40 +65,10 @@ public class TopBarPanel extends JPanel implements ActionListener {
                     "Error",
                     JOptionPane.ERROR_MESSAGE);
             return;
-        }
-
-        try {
-            GitHubHandler gh = new GitHubHandler(token);
-            List<String> files = gh.listFilesRecursive(url);
-            //centerPanel.displayFiles(files);
-
-        } catch (IOException ex) {
-            //centerPanel.displayError("IO Error: " + ex.getMessage());
-            JOptionPane.showMessageDialog(this,
-                    "Failed to fetch files:\n" + ex.getMessage(), "IO Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
-
-        } catch (Exception ex) {
-            //centerPanel.displayError("Error: " + ex.getMessage());
-            JOptionPane.showMessageDialog(this,
-                    "An error occurred:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);
-            ex.printStackTrace();
+        } else {
+            FileHandler.getFileList(url);
+            FileHandler.getFile("https://github.com/CSC3100/Tool-Maven/blob/main/src/main/java/javiergs/Main.java");
         }
     }
-
-    /*
-    public void displayFiles(List<String> files) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Files found: ").append(files.size()).append("\n\n");
-        for (String file : files) {
-            sb.append(file).append("\n");
-        }
-        testField.setText(sb.toString());
-    }
-
-    public void displayError(String errorMessage) {
-        testField.setText(errorMessage);
-    }
-     */
 }
 

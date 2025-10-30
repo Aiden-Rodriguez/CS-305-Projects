@@ -70,6 +70,8 @@ public class Main extends JFrame{
         southStack.add(statusBar, BorderLayout.SOUTH);
         add(southStack, BorderLayout.SOUTH);
 
+
+        // Test with: https://github.com/CSC3100/Tool-Maven/tree/main
         //topBar.setOnOk(url -> System.out.println("OK clicked, URL = " + url));
         grid.setOnCellClicked((row, col) -> bottom.setSelectedName("r" + row + "_c" + col));
 
