@@ -7,7 +7,7 @@ import java.util.List;
 
 public final class FileHandler {
 
-    private final static String token = "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";
+    private final static String token = "";
 
     private FileHandler(){}
 
