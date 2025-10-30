@@ -15,7 +15,7 @@ public class Main extends JFrame{
         main.pack();
         main.setSize(600, 400);
         main.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        main.setTitle("Assignment 01");
+        main.setTitle("Assignment 02");
         main.setVisible(true);
     }
 
@@ -27,19 +27,24 @@ public class Main extends JFrame{
 
         ToolBarListener tbListener = new ToolBarListener();
 
-        JMenuItem openMenuItem = new JMenuItem("Open");
-        openMenuItem.addActionListener(tbListener);
+        JMenuItem openURLMenuItem = new JMenuItem("Open from URL...");
+        openURLMenuItem.addActionListener(tbListener);
         JMenuItem exitMenuItem = new JMenuItem("Exit");
         exitMenuItem.addActionListener(tbListener);
-        JMenuItem actionMenuItem = new JMenuItem("Action");
-        actionMenuItem.addActionListener(tbListener);
+
+        JMenuItem reloadMenuItem = new JMenuItem("Reload");
+        reloadMenuItem.addActionListener(tbListener);
+        JMenuItem clearMenuItem = new JMenuItem("Clear");
+        clearMenuItem.addActionListener(tbListener);
+
         JMenuItem aboutMenuItem = new JMenuItem("About");
         aboutMenuItem.addActionListener(tbListener);
 
-        fileMenu.add(openMenuItem);
+        fileMenu.add(openURLMenuItem);
         fileMenu.addSeparator();
         fileMenu.add(exitMenuItem);
-        actionMenu.add(actionMenuItem);
+        actionMenu.add(reloadMenuItem);
+        actionMenu.add(clearMenuItem);
         helpMenu.add(aboutMenuItem);
 
         menuBar.add(fileMenu);
@@ -51,15 +56,14 @@ public class Main extends JFrame{
         BorderLayout layout = new BorderLayout();
         setLayout(layout);
 
-        FileGrid fileGrid = new FileGrid();
-        Blackboard.getInstance().setFileGrid(fileGrid);
-        add(fileGrid, BorderLayout.WEST);
-
+        JPanel topBar = new JPanel();
+        JPanel centerPanel = new JPanel();
+        JPanel bottomArea = new JPanel();
         StatusBar statusBar = new StatusBar();
-        Blackboard.getInstance().setStatusBar(statusBar);
-        add(statusBar, BorderLayout.SOUTH);
 
-        GraphicsPanel graphics = new GraphicsPanel();
-        add(graphics, BorderLayout.CENTER);
+        add(topBar, BorderLayout.NORTH);
+        add(centerPanel, BorderLayout.CENTER);
+        add(bottomArea, BorderLayout.SOUTH);
+        add(statusBar, BorderLayout.SOUTH);
     }
 }
