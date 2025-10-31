@@ -15,7 +15,7 @@ import java.util.concurrent.CancellationException;
  */
 public final class FileHandler {
 
-    private final static String TOKEN = "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\n";
+    private final static String TOKEN = "";
 
     private FileHandler() {}
 
