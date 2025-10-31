@@ -12,7 +12,7 @@ public class Main extends JFrame{
 
     private final TopBarPanel topBar = new TopBarPanel();
     private final GridPanel grid = new GridPanel(12, 7, 42);
-    private final BottomStatusPanel bottom = new BottomStatusPanel();
+    private final SelectedFileNamePanel bottom = new SelectedFileNamePanel();
 
     public static void main(String[] args) {
         Main main = new Main();
@@ -82,6 +82,6 @@ public class Main extends JFrame{
 
         Blackboard bb = Blackboard.getInstance();
         bb.setStatusBar(statusBar);
-        bb.setGrid(grid);  // Register the grid with Blackboard
+        bb.setGrid(grid);
     }
 }

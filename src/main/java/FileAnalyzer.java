@@ -1,6 +1,14 @@
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * Class that holds analyzes file string
+ * and gives the metrics
+ * @author Aiden Rodriguez
+ * @author Brandon Powell - GH - Bpowell5184
+ * @version 1.1
+ */
+
 public final class FileAnalyzer {
 
     private FileAnalyzer() {}
@@ -21,16 +29,6 @@ public final class FileAnalyzer {
             this.hasAuthor   = hasAuthor;
             this.hasVersion  = hasVersion;
         }
-
-        public String toStatusMessage() {
-            return String.format(
-                    "%,d lines | if:%d switch:%d for:%d while:%d | @author:%s @version:%s",
-                    lineCount, ifCount, switchCount, forCount, whileCount,
-                    yesNo(hasAuthor), yesNo(hasVersion)
-            );
-        }
-
-        private static String yesNo(boolean b) { return b ? "yes" : "no"; }
     }
 
     /** Analyze already-fetched file content (case-insensitive counts). */
@@ -39,7 +37,7 @@ public final class FileAnalyzer {
 
         // Count lines (handles \n, \r\n, \r)
         long lineCount = content.isEmpty() ? 0
-                : content.split("\\R", -1).length; // \R = any linebreak
+                : content.split("\\R", -1).length;
 
         int ifCount     = countWord(content, "(?i)\\bif\\b");
         int switchCount = countWord(content, "(?i)\\bswitch\\b");

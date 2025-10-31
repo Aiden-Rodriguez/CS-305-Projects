@@ -1,10 +1,16 @@
 import javiergs.tulip.GitHubHandler;
 
-import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+
+/**
+ * Class that deals with the fetching of github files
+ * @author Aiden Rodriguez
+ * @author Brandon Powell - GH - Bpowell5184
+ * @version 1.1
+ */
 
 public final class FileHandler {
 
@@ -30,9 +36,6 @@ public final class FileHandler {
 
             Blackboard.getInstance().setStatusBarMessage("Processing " + files.size() + " files...");
 
-            // The listFilesRecursive method returns relative paths
-            // We need to construct full blob URLs from them
-            // Extract the base URL (before /tree/)
             String baseUrl = url;
             if (url.contains("/tree/")) {
                 baseUrl = url.substring(0, url.indexOf("/tree/"));
@@ -51,7 +54,6 @@ public final class FileHandler {
                 }
             }
 
-            // Filter to only include .java files and construct full URLs
             List<String> javaFileUrls = new ArrayList<>();
             for (String relativePath : files) {
                 if (relativePath.endsWith(".java")) {
@@ -78,10 +80,6 @@ public final class FileHandler {
         return Collections.emptyList();
     }
 
-    /**
-     * Gets the content of a file from a GitHub blob URL.
-     * The URL should be a full blob URL as returned by listFilesRecursive.
-     */
     public static String getFile(String url){
         try {
             GitHubHandler gh = new GitHubHandler(token);
@@ -99,9 +97,5 @@ public final class FileHandler {
             sb.append(file).append("\n");
         }
         System.out.println(sb.toString());
-    }
-
-    public static void displayError(String errorMessage) {
-        System.out.println(errorMessage);
     }
 }

@@ -17,9 +17,9 @@ public class GridPanel extends JComponent {
     private static final Color WHITE = new Color(255,255,255);
 
     private Color[][] pattern;
-    private float[][] alphas;  // Transparency values for each cell
-    private String[][] fileNames;  // Store filename for each cell
-    private FileAnalyzer.AnalysisResult[][] analysisResults;  // Store analysis for tooltips
+    private float[][] alphas;
+    private String[][] fileNames;
+    private FileAnalyzer.AnalysisResult[][] analysisResults;
 
     public GridPanel(int cols, int rows, int cellSize) {
         this.cols = cols; this.rows = rows; this.cell = cellSize;
@@ -29,11 +29,11 @@ public class GridPanel extends JComponent {
         fileNames = new String[rows][cols];
         analysisResults = new FileAnalyzer.AnalysisResult[rows][cols];
 
-        // Initialize all alphas to 1.0 (fully opaque)
         for (int r = 0; r < rows; r++) {
             for (int c = 0; c < cols; c++) {
                 alphas[r][c] = 1.0f;
                 fileNames[r][c] = "";
+                pattern[r][c] = WHITE;
             }
         }
 
@@ -100,11 +100,9 @@ public class GridPanel extends JComponent {
                 if (fileIndex < results.length) {
                     FileAnalyzer.AnalysisResult result = results[fileIndex];
 
-                    // Calculate total control statements
                     int controlStatements = result.ifCount + result.switchCount +
                             result.forCount + result.whileCount;
 
-                    // Determine color based on complexity
                     Color baseColor;
                     if (controlStatements > 10) {
                         baseColor = RED;
@@ -116,20 +114,17 @@ public class GridPanel extends JComponent {
 
                     pattern[r][c] = baseColor;
 
-                    // Calculate transparency based on line count
                     if (maxLines == 0) {
                         alphas[r][c] = 0.0f;
                     } else {
                         alphas[r][c] = (float) result.lineCount / maxLines;
                     }
 
-                    // Store filename and analysis result
                     this.fileNames[r][c] = names[fileIndex];
                     this.analysisResults[r][c] = result;
 
                     fileIndex++;
                 } else {
-                    // No file for this cell, make it white and fully transparent
                     pattern[r][c] = WHITE;
                     alphas[r][c] = 0.0f;
                     this.fileNames[r][c] = "";
@@ -157,7 +152,6 @@ public class GridPanel extends JComponent {
                 int x = 1 + c * cell;
                 int y = 1 + r * cell;
 
-                // Set color with alpha transparency
                 Color baseColor = pattern[r][c];
                 float alpha = alphas[r][c];
                 Color colorWithAlpha = new Color(
@@ -169,7 +163,6 @@ public class GridPanel extends JComponent {
                 g2.setColor(colorWithAlpha);
                 g2.fillRect(x + pad, y + pad, cell - pad * 2, cell - pad * 2);
 
-                // Draw grid lines
                 g2.setColor(Color.BLACK);
                 if (r == rows - 1) {
                     g2.drawLine(x, y + cell, x + cell, y + cell);
@@ -180,7 +173,6 @@ public class GridPanel extends JComponent {
                 if (r == 0) g2.drawLine(x, y, x + cell, y);
                 if (c == 0) g2.drawLine(x, y, x, y + cell);
 
-                // Draw selection highlight
                 if (selected != null && selected.equals(new Point(c, r))) {
                     g2.setStroke(new BasicStroke(2f));
                     g2.setColor(new Color(30,144,255,180));
@@ -195,19 +187,11 @@ public class GridPanel extends JComponent {
 
     private Color[][] makePattern(int rows, int cols) {
         Color[][] p = new Color[rows][cols];
-        for (int r = 0; r < rows; r++)
-            for (int c = 0; c < cols; c++)
-                p[r][c] = LIME;
-
-        for (int c = cols - 4; c < cols; c++) p[rows - 1][c] = WHITE;
-        p[rows - 2][cols - 3] = WHITE; p[rows - 2][cols - 2] = WHITE;
-
-        int[][] yell = {{0,2},{0,3},{0,10},{1,0},{1,1},{1,10},{3,1},{3,2},{3,10},{5,1},{6,1},{6,10}};
-        for (int[] rc : yell) p[rc[0]][rc[1]] = YELL;
-
-        int[][] reds = {{0,0},{1,2},{1,3},{1,4},{2,0},{2,4},{2,5},{2,6},{3,0},{3,5},{4,0},{4,5},{5,0}};
-        for (int[] rc : reds) p[rc[0]][rc[1]] = RED;
-
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                p[r][c] = WHITE;
+            }
+        }
         return p;
     }
 }

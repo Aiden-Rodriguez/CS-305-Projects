@@ -1,10 +1,5 @@
-import javiergs.tulip.GitHubHandler;
-
 import java.awt.*;
 import java.awt.event.*;
-import java.io.File;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
@@ -20,7 +15,6 @@ public class TopBarPanel extends JPanel implements ActionListener {
     private final JTextField urlField = new JTextField("GitHub Folder URL");
     private final JButton okButton = new JButton("OK");
     private boolean showingPlaceholder = true;
-    private String token;
 
     public TopBarPanel() {
         super(new GridBagLayout());
@@ -52,35 +46,26 @@ public class TopBarPanel extends JPanel implements ActionListener {
         okButton.addActionListener(this);
     }
 
-    public String getUrlText() {
-        return showingPlaceholder ? "" : urlField.getText().trim();
-    }
-
     public static String getFileName(String pathOrUrl) {
         if (pathOrUrl == null || pathOrUrl.isEmpty()) {
             throw new IllegalArgumentException("Input cannot be null or empty");
         }
 
-        // Remove any trailing slashes
         String trimmed = pathOrUrl.replaceAll("/+$", "");
 
-        // Split by forward slash and return the last piece
         int lastSlash = trimmed.lastIndexOf('/');
-        if (lastSlash == -1) return trimmed; // no slash present
+        if (lastSlash == -1) return trimmed;
         return trimmed.substring(lastSlash + 1);
     }
 
     public static String toTreeDirUrl(String url) {
         if (url == null || url.isEmpty()) throw new IllegalArgumentException("URL empty");
-        // Ensure directory semantics
         url = url.replace("/blob/", "/tree/");
-        // strip trailing slashes (optional)
         return url.replaceAll("/+$", "");
     }
 
     public static String toBlobFileUrl(String url) {
         if (url == null || url.isEmpty()) throw new IllegalArgumentException("URL empty");
-        // Ensure file semantics
         return url.replace("/tree/", "/blob/");
     }
 
@@ -105,7 +90,6 @@ public class TopBarPanel extends JPanel implements ActionListener {
 
             bb.setStatusBarMessage("Found " + javaFiles.size() + " Java files. Analyzing...");
 
-            // Analyze all Java files and find max line count
             FileAnalyzer.AnalysisResult[] results = new FileAnalyzer.AnalysisResult[javaFiles.size()];
             String[] fileNames = new String[javaFiles.size()];
             long maxLines = 0;
@@ -115,7 +99,6 @@ public class TopBarPanel extends JPanel implements ActionListener {
                     bb.setStatusBarMessage("Analyzing file " + (i + 1) + " of " + javaFiles.size() + "...");
                     String fileUrl = javaFiles.get(i);
 
-                    // Extract just the filename from the URL
                     fileNames[i] = getFileName(fileUrl);
 
                     String content = FileHandler.getFile(fileUrl);
@@ -125,14 +108,12 @@ public class TopBarPanel extends JPanel implements ActionListener {
                         maxLines = results[i].lineCount;
                     }
                 } catch (Exception ex) {
-                    // If a specific file fails, create an empty result
                     results[i] = new FileAnalyzer.AnalysisResult(0, 0, 0, 0, 0, false, false);
                     fileNames[i] = "Error loading file";
                     System.err.println("Warning: Could not load file " + javaFiles.get(i));
                 }
             }
 
-            // Update grid with file analysis results
             GridPanel grid = bb.getGrid();
             if (grid != null) {
                 grid.updateFromFiles(results, maxLines, fileNames);
