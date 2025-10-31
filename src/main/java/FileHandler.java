@@ -9,7 +9,7 @@ import java.util.concurrent.CancellationException;
 
 /**
  * Handles fetching files from GitHub using the GitHubHandler
- * @author Aiden Rodriguez
+ * @author Aiden Rodriguez - GH - Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
  * @version 1.1
  */

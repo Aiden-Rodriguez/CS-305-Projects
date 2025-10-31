@@ -4,7 +4,7 @@ import java.util.regex.Pattern;
 /**
  * Class that holds analyzes file string
  * and gives the metrics
- * @author Aiden Rodriguez
+ * @author Aiden Rodriguez - GH - Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
  * @version 1.1
  */

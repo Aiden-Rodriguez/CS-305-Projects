@@ -1,22 +1,22 @@
 import java.awt.*;
 import java.awt.event.*;
+import java.beans.PropertyChangeEvent;
+import java.beans.PropertyChangeListener;
 import javax.swing.*;
 
 /**
  * Panel that displays a grid of cells representing files.
  * Handles visualization and user interaction with the grid.
+ * Listens to Blackboard for grid data updates via PropertyChangeListener.
  * @author Aiden Rodriguez - GH Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
- * @version 1.1
+ * @version 1.2
  */
 public class GridPanel extends JComponent {
-
-    public interface CellClickListener { void onClick(int row, int col); }
 
     private final int cols, rows, cell;
     private final int pad = 2;
     private Point selected = null;
-    private CellClickListener listener;
 
     private static final Color GREEN = Color.GREEN;
     private static final Color YELLOW = Color.YELLOW;
@@ -36,6 +36,7 @@ public class GridPanel extends JComponent {
 
         initializeGrid();
         setupMouseListeners();
+        registerWithBlackboard();
     }
 
     private void initializeGrid() {
@@ -70,14 +71,35 @@ public class GridPanel extends JComponent {
         });
     }
 
+    private void registerWithBlackboard() {
+        Blackboard bb = Blackboard.getInstance();
+
+        bb.addPropertyChangeListener("gridData", new PropertyChangeListener() {
+            @Override
+            public void propertyChange(PropertyChangeEvent evt) {
+                Blackboard.GridData newData = (Blackboard.GridData) evt.getNewValue();
+                if (newData != null && newData.results != null) {
+                    SwingUtilities.invokeLater(() ->
+                            updateFromFiles(newData.results, newData.maxLines, newData.names)
+                    );
+                }
+            }
+        });
+    }
+
     private void handleCellClick(MouseEvent e) {
         int c = (e.getX() - 1) / cell;
         int r = (e.getY() - 1) / cell;
         if (r >= 0 && r < rows && c >= 0 && c < cols) {
             selected = new Point(c, r);
-            if (listener != null) {
-                listener.onClick(r, c);
+
+            String fileName = fileNames[r][c];
+            if (fileName != null && !fileName.isEmpty()) {
+                Blackboard.getInstance().setSelectedFileName(fileName);
+            } else {
+                Blackboard.getInstance().setSelectedFileName("(empty)");
             }
+
             repaint();
         }
     }
@@ -104,18 +126,7 @@ public class GridPanel extends JComponent {
         setToolTipText(null);
     }
 
-    public void setOnCellClicked(CellClickListener l) {
-        this.listener = l;
-    }
-
-    public String getFileNameAt(int row, int col) {
-        if (row >= 0 && row < rows && col >= 0 && col < cols) {
-            return fileNames[row][col];
-        }
-        return "";
-    }
-
-    public void updateFromFiles(FileAnalyzer.AnalysisResult[] results, long maxLines, String[] names) {
+    private void updateFromFiles(FileAnalyzer.AnalysisResult[] results, long maxLines, String[] names) {
         pattern = new Color[rows][cols];
         alphas = new float[rows][cols];
         this.fileNames = new String[rows][cols];
@@ -141,7 +152,6 @@ public class GridPanel extends JComponent {
         int controlStatements = result.ifCount + result.switchCount +
                 result.forCount + result.whileCount;
 
-        // Determine color based on complexity
         if (controlStatements > 10) {
             pattern[row][col] = RED;
         } else if (controlStatements > 5) {

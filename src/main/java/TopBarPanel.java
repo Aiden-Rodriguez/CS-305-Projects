@@ -5,10 +5,11 @@ import javax.swing.*;
 
 /**
  * Panel that provides URL input and triggers file loading.
- * Coordinates between FileHandler and GridPanel via Blackboard.
- * @author Aiden Rodriguez - GH Aiden-Rodriguez
+ * Communicates with Blackboard to coordinate file loading workflow.
+ * Separated concerns: UI management, URL validation, and workflow coordination.
+ * @author Aiden Rodriguez - GH - Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
- * @version 1.1
+ * @version 1.2
  */
 public class TopBarPanel extends JPanel implements ActionListener {
 
@@ -21,57 +22,6 @@ public class TopBarPanel extends JPanel implements ActionListener {
         setupLayout();
         setupPlaceholderBehavior();
         okButton.addActionListener(this);
-    }
-
-    private static class FileAnalysisWorker extends SwingWorker<Void, String> {
-        private final List<String> javaFiles;
-
-        FileAnalysisWorker(List<String> javaFiles) {
-            this.javaFiles = javaFiles;
-        }
-
-        @Override
-        protected Void doInBackground() throws Exception {
-            Blackboard bb = Blackboard.getInstance();
-            publish("Analyzing " + javaFiles.size() + " files...");
-
-            FileAnalyzer.AnalysisResult[] results = new FileAnalyzer.AnalysisResult[javaFiles.size()];
-            String[] fileNames = new String[javaFiles.size()];
-            long maxLines = 0;
-
-            for (int i = 0; i < javaFiles.size(); i++) {
-                publish("Analyzing file " + (i + 1) + " of " + javaFiles.size() + "...");
-
-                String fileUrl = javaFiles.get(i);
-                String fileName = URLFormatter.extractFileName(fileUrl);
-                String content = FileHandler.getFile(fileUrl);
-                FileAnalyzer.AnalysisResult result = FileAnalyzer.analyze(content);
-
-                results[i] = result;
-                fileNames[i] = fileName;
-                if (result.lineCount > maxLines) maxLines = result.lineCount;
-            }
-
-            final long finalMaxLines = maxLines;
-            final FileAnalyzer.AnalysisResult[] finalResults = results;
-            final String[] finalNames = fileNames;
-
-            SwingUtilities.invokeLater(() -> {
-                GridPanel grid = bb.getGrid();
-                if (grid != null) {
-                    grid.updateFromFiles(finalResults, finalMaxLines, finalNames);
-                }
-                bb.setStatusBarMessage("Loaded " + javaFiles.size() + " files");
-            });
-
-            return null;
-        }
-
-        @Override
-        protected void process(List<String> chunks) {
-            String latest = chunks.get(chunks.size() - 1);
-            Blackboard.getInstance().setStatusBarMessage(latest);
-        }
     }
 
     private void setupLayout() {
@@ -113,32 +63,18 @@ public class TopBarPanel extends JPanel implements ActionListener {
     @Override
     public void actionPerformed(ActionEvent e) {
         String input = getInputUrl();
-        if (input == null) return;
+        if (input == null) {
+            return;
+        }
 
         Blackboard bb = Blackboard.getInstance();
         bb.setStatusBarMessage("Preparing...");
 
         try {
             String dirUrl = URLFormatter.toTreeDirUrl(input);
+            bb.setCurrentUrl(dirUrl);
 
-            FileHandler.getFileListAsync(dirUrl, new FileHandler.FileListCallback() {
-                @Override
-                public void onSuccess(List<String> javaFiles) {
-                    if (javaFiles.isEmpty()) {
-                        bb.setStatusBarMessage("No .java files found.");
-                        return;
-                    }
-
-                    // Now analyze files in background
-                    new FileAnalysisWorker(javaFiles).execute();
-                }
-
-                @Override
-                public void onError(Exception ex) {
-                    bb.setStatusBarMessage("Failed to load file list.");
-                    ex.printStackTrace();
-                }
-            });
+            loadFilesFromGitHub(dirUrl);
 
         } catch (Exception ex) {
             bb.setStatusBarMessage("Invalid URL");
@@ -158,28 +94,24 @@ public class TopBarPanel extends JPanel implements ActionListener {
         return input;
     }
 
-    private static class URLFormatter {
+    private void loadFilesFromGitHub(String dirUrl) {
+        FileHandler.getFileListAsync(dirUrl, new FileHandler.FileListCallback() {
+            @Override
+            public void onSuccess(List<String> javaFiles) {
+                if (javaFiles.isEmpty()) {
+                    Blackboard.getInstance().setStatusBarMessage("No .java files found.");
+                    return;
+                }
 
-        public static String toTreeDirUrl(String url) {
-            if (url == null || url.isEmpty()) {
-                throw new IllegalArgumentException("URL cannot be empty");
-            }
-            url = url.replace("/blob/", "/tree/");
-            return url.replaceAll("/+$", "");
-        }
-
-        public static String extractFileName(String pathOrUrl) {
-            if (pathOrUrl == null || pathOrUrl.isEmpty()) {
-                throw new IllegalArgumentException("Path cannot be null or empty");
+                // Start file analysis in background
+                new FileAnalysisWorker(javaFiles).execute();
             }
 
-            String trimmed = pathOrUrl.replaceAll("/+$", "");
-            int lastSlash = trimmed.lastIndexOf('/');
-
-            if (lastSlash == -1) {
-                return trimmed;
+            @Override
+            public void onError(Exception ex) {
+                Blackboard.getInstance().setStatusBarMessage("Failed to load file list.");
+                ex.printStackTrace();
             }
-            return trimmed.substring(lastSlash + 1);
-        }
+        });
     }
 }

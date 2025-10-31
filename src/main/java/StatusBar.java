@@ -6,7 +6,7 @@ import java.beans.PropertyChangeListener;
 /**
  * Status bar that displays what is happening to the user within the program.
  * Now listens to Blackboard status message changes via PropertyChangeListener.
- * @author Aiden Rodriguez - GH Aiden-Rodriguez
+ * @author Aiden Rodriguez - GH - Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
  * @version 1.1
  */
