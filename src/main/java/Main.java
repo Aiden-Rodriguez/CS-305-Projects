@@ -71,6 +71,7 @@ public class Main extends JFrame{
         add(southStack, BorderLayout.SOUTH);
 
         // Test with: https://github.com/CSC3100/Tool-Maven/tree/main
+        // https://github.com/Aiden-Rodriguez/CS-305-Projects/tree/main/src/main/java
         grid.setOnCellClicked((row, col) -> {
             String fileName = grid.getFileNameAt(row, col);
             if (fileName != null && !fileName.isEmpty()) {
@@ -82,6 +83,7 @@ public class Main extends JFrame{
 
         Blackboard bb = Blackboard.getInstance();
         bb.setStatusBar(statusBar);
+        statusBar.registerWithBlackboard();
         bb.setGrid(grid);
     }
 }

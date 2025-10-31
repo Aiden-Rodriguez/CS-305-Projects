@@ -31,7 +31,6 @@ public final class FileAnalyzer {
         }
     }
 
-    /** Analyze already-fetched file content (case-insensitive counts). */
     public static AnalysisResult analyze(String content) {
         if (content == null) content = "";
 

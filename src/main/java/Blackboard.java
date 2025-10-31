@@ -1,4 +1,6 @@
 import javax.swing.*;
+import java.beans.PropertyChangeListener;
+import java.beans.PropertyChangeSupport;
 
 /**
  * Class that holds shared global variables
@@ -24,27 +26,20 @@ public class Blackboard {
     private StatusBar statusBar;
     private GridPanel grid;
 
-    private RectanglePanel complexityPanel;
-    private RectanglePanel sizePanel;
+    private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-    public void setComplexityPanel(RectanglePanel p) { this.complexityPanel = p; }
-    public void setSizePanel(RectanglePanel p) { this.sizePanel = p; }
     public void setGrid(GridPanel g) { this.grid = g; }
     public GridPanel getGrid() { return this.grid; }
 
-    private long maxLinesInFile = 30;
-    private long maxControlStatementsInFile = 30;
-    private long currentLinesInFile;
-    private long currentControlStatementsInFile;
 
-    private Boolean isAuthorInFile;
-    private Boolean isVersionInFile;
-
+    /**
+     * Sets the status bar message and fires a property change event.
+     */
     public void setStatusBarMessage(String message) {
+        String oldMessage = this.statusMessage;
         this.statusMessage = message;
-        if (statusBar != null) {
-            statusBar.setMessage(message);
-        }
+
+        pcs.firePropertyChange("statusMessage", oldMessage, message);
     }
 
     public String getStatusBarMessage() {
@@ -53,47 +48,10 @@ public class Blackboard {
 
     public void setStatusBar(StatusBar statusBar) {
         this.statusBar = statusBar;
-        if (statusBar != null) {
-            statusBar.setMessage(statusMessage);
-        }
     }
 
-    public void setMaxLinesInFile(long maxLinesInFile) {
-        this.maxLinesInFile = maxLinesInFile;
-        pushSizeUpdate();
-    }
-    public void setMaxControlStatementsInFile(long maxControlStatementsInFile) {
-        this.maxControlStatementsInFile = maxControlStatementsInFile;
-        pushComplexityUpdate();
+    public void addPropertyChangeListener(String propertyName, PropertyChangeListener listener) {
+        pcs.addPropertyChangeListener(propertyName, listener);
     }
 
-    public void setCurrentLinesInFile(long currentLinesInFile) {
-        this.currentLinesInFile = currentLinesInFile;
-        pushSizeUpdate();
-    }
-    public void setCurrentControlStatementsInFile(long currentControlStatementsInFile) {
-        this.currentControlStatementsInFile = currentControlStatementsInFile;
-        pushComplexityUpdate();
-    }
-
-    private void pushSizeUpdate() {
-        if (sizePanel == null) return;
-        int cur = (int)Math.max(0, Math.min(currentLinesInFile, Integer.MAX_VALUE));
-        int max = (int)Math.max(1, Math.min(maxLinesInFile, Integer.MAX_VALUE));
-        SwingUtilities.invokeLater(() -> sizePanel.updateValues(cur, max));
-    }
-    private void pushComplexityUpdate() {
-        if (complexityPanel == null) return;
-        int cur = (int)Math.max(0, Math.min(currentControlStatementsInFile, Integer.MAX_VALUE));
-        int max = (int)Math.max(1, Math.min(maxControlStatementsInFile, Integer.MAX_VALUE));
-        SwingUtilities.invokeLater(() -> complexityPanel.updateValues(cur, max));
-    }
-
-    public void setIsAuthorInFile(Boolean isAuthorInFile) {
-        this.isAuthorInFile = isAuthorInFile;
-    }
-
-    public void setIsVersionInFile(Boolean isVersionInFile) {
-        this.isVersionInFile = isVersionInFile;
-    }
 }

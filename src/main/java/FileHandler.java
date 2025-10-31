@@ -1,101 +1,142 @@
 import javiergs.tulip.GitHubHandler;
 
+import javax.swing.*;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.CancellationException;
 
 /**
- * Class that deals with the fetching of github files
+ * Handles fetching files from GitHub using the GitHubHandler
  * @author Aiden Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
  * @version 1.1
  */
-
 public final class FileHandler {
 
-    private final static String token = "";
+    private final static String TOKEN = "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\n";
 
-    private FileHandler(){}
+    private FileHandler() {}
 
-    /**
-     * Gets a list of file URLs from a GitHub directory recursively.
-     * Returns full blob URLs that can be used directly with getFile().
-     */
-    public static List<String> getFileList(String url){
+    public static void getFileListAsync(String url, FileListCallback callback) {
+        new FileListWorker(url, callback).execute();
+    }
+
+    public static String getFile(String url) {
         try {
-            GitHubHandler gh = new GitHubHandler(token);
+            GitHubHandler gh = new GitHubHandler(TOKEN);
+            return gh.getFileContentFromUrl(url);
+        } catch (IOException e) {
+            throw new RuntimeException("Failed to fetch file: " + url, e);
+        }
+    }
 
-            Blackboard.getInstance().setStatusBarMessage("Connecting to GitHub...");
-            List<String> files = gh.listFilesRecursive(url);
+    private static class FileListWorker extends SwingWorker<List<String>, String> {
+        private final String url;
+        private final FileListCallback callback;
 
-            if (files == null || files.isEmpty()) {
-                Blackboard.getInstance().setStatusBarMessage("No files found");
+        FileListWorker(String url, FileListCallback callback) {
+            this.url = url;
+            this.callback = callback;
+        }
+
+        @Override
+        protected List<String> doInBackground() throws Exception {
+            publish("Connecting to GitHub...");
+
+            List<String> relativePaths = fetchFilesFromGitHub(url);
+            if (relativePaths == null || relativePaths.isEmpty()) {
+                publish("No files found");
                 return Collections.emptyList();
             }
 
-            Blackboard.getInstance().setStatusBarMessage("Processing " + files.size() + " files...");
+            publish("Processing " + relativePaths.size() + " files...");
 
-            String baseUrl = url;
-            if (url.contains("/tree/")) {
-                baseUrl = url.substring(0, url.indexOf("/tree/"));
-            }
+            List<String> javaFileUrls = buildJavaFileUrls(url, relativePaths);
 
-            // Get the branch/ref part
-            String branchPart = "";
-            if (url.contains("/tree/")) {
-                int treeIndex = url.indexOf("/tree/");
-                String afterTree = url.substring(treeIndex + 6); // skip "/tree/"
-                int nextSlash = afterTree.indexOf('/');
-                if (nextSlash != -1) {
-                    branchPart = afterTree.substring(0, nextSlash);
-                } else {
-                    branchPart = afterTree;
-                }
-            }
-
-            List<String> javaFileUrls = new ArrayList<>();
-            for (String relativePath : files) {
-                if (relativePath.endsWith(".java")) {
-                    // Construct full blob URL: baseUrl/blob/branch/relativePath
-                    String fullUrl = baseUrl + "/blob/" + branchPart + "/" + relativePath;
-                    javaFileUrls.add(fullUrl);
-                }
-            }
-
-            displayFiles(javaFileUrls);
-            Blackboard.getInstance().setStatusBarMessage("Found " + javaFileUrls.size() + " Java files");
+            publish("Found " + javaFileUrls.size() + " Java files");
             return javaFileUrls;
-
-        } catch (IOException ex) {
-            System.err.println("IO Error: " + ex.getMessage());
-            Blackboard.getInstance().setStatusBarMessage("IO Error: " + ex.getMessage());
-            ex.printStackTrace();
-        } catch (Exception ex) {
-            System.err.println("Error: " + ex.getMessage());
-            Blackboard.getInstance().setStatusBarMessage("Error: " + ex.getMessage());
-            ex.printStackTrace();
         }
 
-        return Collections.emptyList();
-    }
+        @Override
+        protected void process(List<String> chunks) {
+            String latest = chunks.get(chunks.size() - 1);
+            Blackboard.getInstance().setStatusBarMessage(latest);
+        }
 
-    public static String getFile(String url){
-        try {
-            GitHubHandler gh = new GitHubHandler(token);
-            String file = gh.getFileContentFromUrl(url);
-            return file;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        @Override
+        protected void done() {
+            try {
+                List<String> result = get();
+                callback.onSuccess(result);
+            } catch (CancellationException e) {
+                Blackboard.getInstance().setStatusBarMessage("Operation canceled");
+            } catch (Exception e) {
+                handleError("Error: " + e.getMessage());
+                callback.onError(e);
+            }
         }
     }
 
-    public static void displayFiles(List<String> files) {
-        StringBuilder sb = new StringBuilder();
-        sb.append("Files found: ").append(files.size()).append("\n\n");
-        for (String file : files) {
-            sb.append(file).append("\n");
+    private static List<String> fetchFilesFromGitHub(String url) throws IOException {
+        GitHubHandler gh = new GitHubHandler(TOKEN);
+        return gh.listFilesRecursive(url);
+    }
+
+    private static List<String> buildJavaFileUrls(String baseTreeUrl, List<String> relativePaths) {
+        URLBuilder urlBuilder = new URLBuilder(baseTreeUrl);
+        List<String> javaFileUrls = new ArrayList<>();
+
+        for (String relativePath : relativePaths) {
+            if (relativePath.endsWith(".java")) {
+                String fullUrl = urlBuilder.buildBlobUrl(relativePath);
+                javaFileUrls.add(fullUrl);
+            }
         }
-        System.out.println(sb.toString());
+        return javaFileUrls;
+    }
+
+    private static void handleError(String message) {
+        System.err.println(message);
+        SwingUtilities.invokeLater(() ->
+                Blackboard.getInstance().setStatusBarMessage(message)
+        );
+    }
+
+    private static class URLBuilder {
+        private final String baseUrl;
+        private final String branchName;
+
+        public URLBuilder(String treeUrl) {
+            this.baseUrl = extractBaseUrl(treeUrl);
+            this.branchName = extractBranchName(treeUrl);
+        }
+
+        public String buildBlobUrl(String relativePath) {
+            return baseUrl + "/blob/" + branchName + "/" + relativePath;
+        }
+
+        private String extractBaseUrl(String url) {
+            if (url.contains("/tree/")) {
+                return url.substring(0, url.indexOf("/tree/"));
+            }
+            return url;
+        }
+
+        private String extractBranchName(String url) {
+            if (!url.contains("/tree/")) {
+                return "main";
+            }
+            int treeIndex = url.indexOf("/tree/");
+            String afterTree = url.substring(treeIndex + 6);
+            int nextSlash = afterTree.indexOf('/');
+            return nextSlash != -1 ? afterTree.substring(0, nextSlash) : afterTree;
+        }
+    }
+
+    public interface FileListCallback {
+        void onSuccess(List<String> javaFileUrls);
+        void onError(Exception e);
     }
 }
