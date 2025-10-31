@@ -22,11 +22,16 @@ public class Blackboard {
 
     private String statusMessage = "Status Bar";
     private StatusBar statusBar;
+    private GridPanel grid;
 
     private RectanglePanel complexityPanel;
     private RectanglePanel sizePanel;
+
     public void setComplexityPanel(RectanglePanel p) { this.complexityPanel = p; }
     public void setSizePanel(RectanglePanel p) { this.sizePanel = p; }
+    public void setGrid(GridPanel g) { this.grid = g; }
+    public GridPanel getGrid() { return this.grid; }
+
     private long maxLinesInFile = 30;
     private long maxControlStatementsInFile = 30;
     private long currentLinesInFile;
@@ -91,5 +96,4 @@ public class Blackboard {
     public void setIsVersionInFile(Boolean isVersionInFile) {
         this.isVersionInFile = isVersionInFile;
     }
-
 }

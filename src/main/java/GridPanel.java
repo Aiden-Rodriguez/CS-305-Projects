@@ -16,12 +16,26 @@ public class GridPanel extends JComponent {
     private static final Color RED  = new Color(225,35,35);
     private static final Color WHITE = new Color(255,255,255);
 
-    private final Color[][] pattern;
+    private Color[][] pattern;
+    private float[][] alphas;  // Transparency values for each cell
+    private String[][] fileNames;  // Store filename for each cell
+    private FileAnalyzer.AnalysisResult[][] analysisResults;  // Store analysis for tooltips
 
     public GridPanel(int cols, int rows, int cellSize) {
         this.cols = cols; this.rows = rows; this.cell = cellSize;
         setPreferredSize(new Dimension(cols * cellSize + 2, rows * cellSize + 2));
         pattern = makePattern(rows, cols);
+        alphas = new float[rows][cols];
+        fileNames = new String[rows][cols];
+        analysisResults = new FileAnalyzer.AnalysisResult[rows][cols];
+
+        // Initialize all alphas to 1.0 (fully opaque)
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                alphas[r][c] = 1.0f;
+                fileNames[r][c] = "";
+            }
+        }
 
         addMouseListener(new MouseAdapter() {
             @Override public void mouseClicked(MouseEvent e) {
@@ -35,9 +49,97 @@ public class GridPanel extends JComponent {
                 }
             }
         });
+
+        addMouseMotionListener(new MouseMotionAdapter() {
+            @Override
+            public void mouseMoved(MouseEvent e) {
+                int c = (e.getX() - 1) / cell;
+                int r = (e.getY() - 1) / cell;
+                if (r >= 0 && r < rows && c >= 0 && c < cols) {
+                    if (fileNames[r][c] != null && !fileNames[r][c].isEmpty()) {
+                        FileAnalyzer.AnalysisResult result = analysisResults[r][c];
+                        if (result != null) {
+                            int complexity = result.ifCount + result.switchCount +
+                                    result.forCount + result.whileCount;
+                            String tooltip = String.format(
+                                    "<html><b>%s</b><br>Lines: %d<br>Complexity: %d</html>",
+                                    fileNames[r][c], result.lineCount, complexity
+                            );
+                            setToolTipText(tooltip);
+                            return;
+                        }
+                    }
+                }
+                setToolTipText(null);
+            }
+        });
     }
 
     public void setOnCellClicked(CellClickListener l) { this.listener = l; }
+
+    public String getFileNameAt(int row, int col) {
+        if (row >= 0 && row < rows && col >= 0 && col < cols) {
+            return fileNames[row][col];
+        }
+        return "";
+    }
+
+    /**
+     * Update the grid based on file analysis results.
+     * Maps each file to a cell in row-major order.
+     */
+    public void updateFromFiles(FileAnalyzer.AnalysisResult[] results, long maxLines, String[] names) {
+        pattern = new Color[rows][cols];
+        alphas = new float[rows][cols];
+        this.fileNames = new String[rows][cols];
+        this.analysisResults = new FileAnalyzer.AnalysisResult[rows][cols];
+
+        int fileIndex = 0;
+        for (int r = 0; r < rows; r++) {
+            for (int c = 0; c < cols; c++) {
+                if (fileIndex < results.length) {
+                    FileAnalyzer.AnalysisResult result = results[fileIndex];
+
+                    // Calculate total control statements
+                    int controlStatements = result.ifCount + result.switchCount +
+                            result.forCount + result.whileCount;
+
+                    // Determine color based on complexity
+                    Color baseColor;
+                    if (controlStatements > 10) {
+                        baseColor = RED;
+                    } else if (controlStatements > 5) {
+                        baseColor = YELL;
+                    } else {
+                        baseColor = LIME;
+                    }
+
+                    pattern[r][c] = baseColor;
+
+                    // Calculate transparency based on line count
+                    if (maxLines == 0) {
+                        alphas[r][c] = 0.0f;
+                    } else {
+                        alphas[r][c] = (float) result.lineCount / maxLines;
+                    }
+
+                    // Store filename and analysis result
+                    this.fileNames[r][c] = names[fileIndex];
+                    this.analysisResults[r][c] = result;
+
+                    fileIndex++;
+                } else {
+                    // No file for this cell, make it white and fully transparent
+                    pattern[r][c] = WHITE;
+                    alphas[r][c] = 0.0f;
+                    this.fileNames[r][c] = "";
+                    this.analysisResults[r][c] = null;
+                }
+            }
+        }
+
+        repaint();
+    }
 
     @Override
     protected void paintComponent(Graphics g) {
@@ -55,9 +157,19 @@ public class GridPanel extends JComponent {
                 int x = 1 + c * cell;
                 int y = 1 + r * cell;
 
-                g2.setColor(pattern[r][c]);
+                // Set color with alpha transparency
+                Color baseColor = pattern[r][c];
+                float alpha = alphas[r][c];
+                Color colorWithAlpha = new Color(
+                        baseColor.getRed() / 255f,
+                        baseColor.getGreen() / 255f,
+                        baseColor.getBlue() / 255f,
+                        alpha
+                );
+                g2.setColor(colorWithAlpha);
                 g2.fillRect(x + pad, y + pad, cell - pad * 2, cell - pad * 2);
 
+                // Draw grid lines
                 g2.setColor(Color.BLACK);
                 if (r == rows - 1) {
                     g2.drawLine(x, y + cell, x + cell, y + cell);
@@ -68,6 +180,7 @@ public class GridPanel extends JComponent {
                 if (r == 0) g2.drawLine(x, y, x + cell, y);
                 if (c == 0) g2.drawLine(x, y, x, y + cell);
 
+                // Draw selection highlight
                 if (selected != null && selected.equals(new Point(c, r))) {
                     g2.setStroke(new BasicStroke(2f));
                     g2.setColor(new Color(30,144,255,180));

@@ -4,6 +4,7 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import javax.swing.*;
 
@@ -68,43 +69,80 @@ public class TopBarPanel extends JPanel implements ActionListener {
         if (lastSlash == -1) return trimmed; // no slash present
         return trimmed.substring(lastSlash + 1);
     }
-    public static String convertTreeToBlobUrl(String url) {
-        if (url == null || url.isEmpty()) {
-            throw new IllegalArgumentException("URL cannot be null or empty");
-        }
 
-        // Only process GitHub URLs that contain /tree/
-        if (url.contains("github.com/") && url.contains("/tree/")) {
-            return url.replace("/tree/", "/blob/");
-        }
+    public static String toTreeDirUrl(String url) {
+        if (url == null || url.isEmpty()) throw new IllegalArgumentException("URL empty");
+        // Ensure directory semantics
+        url = url.replace("/blob/", "/tree/");
+        // strip trailing slashes (optional)
+        return url.replaceAll("/+$", "");
+    }
 
-        // Return unchanged if already in blob form or not GitHub
-        return url;
+    public static String toBlobFileUrl(String url) {
+        if (url == null || url.isEmpty()) throw new IllegalArgumentException("URL empty");
+        // Ensure file semantics
+        return url.replace("/tree/", "/blob/");
     }
 
     @Override
     public void actionPerformed(ActionEvent e) {
-        String url = urlField.getText().trim();
-
-        if (url.isEmpty()) {
-            JOptionPane.showMessageDialog(this,
-                    "Please enter a GitHub URL",
-                    "Error",
-                    JOptionPane.ERROR_MESSAGE);
+        String input = urlField.getText().trim();
+        Blackboard bb = Blackboard.getInstance();
+        if (input.isEmpty()) {
+            JOptionPane.showMessageDialog(this, "Please enter a GitHub URL", "Error", JOptionPane.ERROR_MESSAGE);
             return;
-        } else {
-            FileHandler.getFileList(url);
-            FileHandler.getFile("https://github.com/CSC3100/Tool-Maven/blob/main/src/main/java/javiergs/Main.java");
-            List <String> fileList = FileHandler.getFileList(url);
-            //https://github.com/Aiden-Rodriguez/CS-305-Projects/tree/main/src/main/java
-            url = convertTreeToBlobUrl(url);
-            String url_to_use_test = url + '/' +getFileName(fileList.get(2));
-            System.out.println(url_to_use_test);
-            System.out.println(getFileName(fileList.get(2)));
-            System.out.println(FileHandler.getFile(url_to_use_test));
+        }
+
+        try {
+            bb.setStatusBarMessage("Fetching file list from GitHub...");
+            String dirUrl = toTreeDirUrl(input);
+            List<String> javaFiles = FileHandler.getFileList(dirUrl);
+
+            if (javaFiles == null || javaFiles.isEmpty()) {
+                bb.setStatusBarMessage("No .java files found in directory.");
+                return;
+            }
+
+            bb.setStatusBarMessage("Found " + javaFiles.size() + " Java files. Analyzing...");
+
+            // Analyze all Java files and find max line count
+            FileAnalyzer.AnalysisResult[] results = new FileAnalyzer.AnalysisResult[javaFiles.size()];
+            String[] fileNames = new String[javaFiles.size()];
+            long maxLines = 0;
+
+            for (int i = 0; i < javaFiles.size(); i++) {
+                try {
+                    bb.setStatusBarMessage("Analyzing file " + (i + 1) + " of " + javaFiles.size() + "...");
+                    String fileUrl = javaFiles.get(i);
+
+                    // Extract just the filename from the URL
+                    fileNames[i] = getFileName(fileUrl);
+
+                    String content = FileHandler.getFile(fileUrl);
+                    results[i] = FileAnalyzer.analyze(content);
+
+                    if (results[i].lineCount > maxLines) {
+                        maxLines = results[i].lineCount;
+                    }
+                } catch (Exception ex) {
+                    // If a specific file fails, create an empty result
+                    results[i] = new FileAnalyzer.AnalysisResult(0, 0, 0, 0, 0, false, false);
+                    fileNames[i] = "Error loading file";
+                    System.err.println("Warning: Could not load file " + javaFiles.get(i));
+                }
+            }
+
+            // Update grid with file analysis results
+            GridPanel grid = bb.getGrid();
+            if (grid != null) {
+                grid.updateFromFiles(results, maxLines, fileNames);
+            }
+
+            bb.setStatusBarMessage("Successfully loaded " + javaFiles.size() + " Java files");
+
+        } catch (Exception ex) {
+            bb.setStatusBarMessage("Error: " + ex.getMessage());
+            ex.printStackTrace();
         }
     }
 }
-
-
-

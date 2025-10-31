@@ -2,6 +2,7 @@ import javiergs.tulip.GitHubHandler;
 
 import javax.swing.*;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
@@ -11,32 +12,76 @@ public final class FileHandler {
 
     private FileHandler(){}
 
+    /**
+     * Gets a list of file URLs from a GitHub directory recursively.
+     * Returns full blob URLs that can be used directly with getFile().
+     */
     public static List<String> getFileList(String url){
-
         try {
             GitHubHandler gh = new GitHubHandler(token);
-            List<String> files = gh.listFilesRecursive(url);
-            displayFiles(files);
-            return files;
 
-            //centerPanel.displayFiles(files);
+            Blackboard.getInstance().setStatusBarMessage("Connecting to GitHub...");
+            List<String> files = gh.listFilesRecursive(url);
+
+            if (files == null || files.isEmpty()) {
+                Blackboard.getInstance().setStatusBarMessage("No files found");
+                return Collections.emptyList();
+            }
+
+            Blackboard.getInstance().setStatusBarMessage("Processing " + files.size() + " files...");
+
+            // The listFilesRecursive method returns relative paths
+            // We need to construct full blob URLs from them
+            // Extract the base URL (before /tree/)
+            String baseUrl = url;
+            if (url.contains("/tree/")) {
+                baseUrl = url.substring(0, url.indexOf("/tree/"));
+            }
+
+            // Get the branch/ref part
+            String branchPart = "";
+            if (url.contains("/tree/")) {
+                int treeIndex = url.indexOf("/tree/");
+                String afterTree = url.substring(treeIndex + 6); // skip "/tree/"
+                int nextSlash = afterTree.indexOf('/');
+                if (nextSlash != -1) {
+                    branchPart = afterTree.substring(0, nextSlash);
+                } else {
+                    branchPart = afterTree;
+                }
+            }
+
+            // Filter to only include .java files and construct full URLs
+            List<String> javaFileUrls = new ArrayList<>();
+            for (String relativePath : files) {
+                if (relativePath.endsWith(".java")) {
+                    // Construct full blob URL: baseUrl/blob/branch/relativePath
+                    String fullUrl = baseUrl + "/blob/" + branchPart + "/" + relativePath;
+                    javaFileUrls.add(fullUrl);
+                }
+            }
+
+            displayFiles(javaFileUrls);
+            Blackboard.getInstance().setStatusBarMessage("Found " + javaFileUrls.size() + " Java files");
+            return javaFileUrls;
 
         } catch (IOException ex) {
-            //centerPanel.displayError("IO Error: " + ex.getMessage());
-            /*JOptionPane.showMessageDialog(this,
-                    "Failed to fetch files:\n" + ex.getMessage(), "IO Error", JOptionPane.ERROR_MESSAGE);*/
+            System.err.println("IO Error: " + ex.getMessage());
+            Blackboard.getInstance().setStatusBarMessage("IO Error: " + ex.getMessage());
             ex.printStackTrace();
-
         } catch (Exception ex) {
-            //centerPanel.displayError("Error: " + ex.getMessage());
-            /*JOptionPane.showMessageDialog(this,
-                    "An error occurred:\n" + ex.getMessage(), "Error", JOptionPane.ERROR_MESSAGE);*/
+            System.err.println("Error: " + ex.getMessage());
+            Blackboard.getInstance().setStatusBarMessage("Error: " + ex.getMessage());
             ex.printStackTrace();
         }
 
-       return Collections.emptyList();
+        return Collections.emptyList();
     }
 
+    /**
+     * Gets the content of a file from a GitHub blob URL.
+     * The URL should be a full blob URL as returned by listFilesRecursive.
+     */
     public static String getFile(String url){
         try {
             GitHubHandler gh = new GitHubHandler(token);

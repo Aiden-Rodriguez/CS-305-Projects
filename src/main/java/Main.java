@@ -70,12 +70,18 @@ public class Main extends JFrame{
         southStack.add(statusBar, BorderLayout.SOUTH);
         add(southStack, BorderLayout.SOUTH);
 
-
         // Test with: https://github.com/CSC3100/Tool-Maven/tree/main
-        //topBar.setOnOk(url -> System.out.println("OK clicked, URL = " + url));
-        grid.setOnCellClicked((row, col) -> bottom.setSelectedName("r" + row + "_c" + col));
+        grid.setOnCellClicked((row, col) -> {
+            String fileName = grid.getFileNameAt(row, col);
+            if (fileName != null && !fileName.isEmpty()) {
+                bottom.setSelectedName(fileName);
+            } else {
+                bottom.setSelectedName("(empty)");
+            }
+        });
 
         Blackboard bb = Blackboard.getInstance();
         bb.setStatusBar(statusBar);
+        bb.setGrid(grid);  // Register the grid with Blackboard
     }
 }
