@@ -7,10 +7,10 @@ import javax.swing.*;
 /**
  * Panel that displays a grid of cells representing files.
  * Handles visualization and user interaction with the grid.
- * Listens to Blackboard for grid data updates via PropertyChangeListener.
+ * Self-registers with Blackboard and listens for grid data updates.
  * @author Aiden Rodriguez - GH Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
- * @version 1.2
+ * @version 1.3
  */
 public class GridPanel extends JComponent {
 
@@ -71,8 +71,14 @@ public class GridPanel extends JComponent {
         });
     }
 
+    /**
+     * Self-registers with Blackboard during construction.
+     * Subscribes to gridData updates.
+     */
     private void registerWithBlackboard() {
         Blackboard bb = Blackboard.getInstance();
+
+        bb.registerGrid(this);
 
         bb.addPropertyChangeListener("gridData", new PropertyChangeListener() {
             @Override

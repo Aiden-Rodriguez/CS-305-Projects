@@ -3,16 +3,12 @@ import java.awt.*;
 
 /**
  * File that controls the program; stitches everything together.
+ * Components self-register with Blackboard - Main just handles layout.
  * @author Aiden Rodriguez - GH - Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
- * @version 1.2
+ * @version 1.3
  */
 public class Main extends JFrame {
-
-    private final TopBarPanel topBar = new TopBarPanel();
-    private final GridPanel grid = new GridPanel(12, 7, 42);
-    private final SelectedFileNamePanel bottom = new SelectedFileNamePanel();
-    private final StatusBar statusBar = new StatusBar();
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
@@ -28,7 +24,6 @@ public class Main extends JFrame {
     public Main() {
         setupMenuBar();
         setupLayout();
-        initializeBlackboard();
     }
 
     private void setupMenuBar() {
@@ -69,6 +64,11 @@ public class Main extends JFrame {
     private void setupLayout() {
         setLayout(new BorderLayout());
 
+        TopBarPanel topBar = new TopBarPanel();
+        GridPanel grid = new GridPanel(12, 7, 42);
+        SelectedFileNamePanel bottom = new SelectedFileNamePanel();
+        StatusBar statusBar = new StatusBar();
+
         add(topBar, BorderLayout.NORTH);
 
         JPanel gridHolder = new JPanel(new BorderLayout());
@@ -79,11 +79,5 @@ public class Main extends JFrame {
         southStack.add(bottom, BorderLayout.CENTER);
         southStack.add(statusBar, BorderLayout.SOUTH);
         add(southStack, BorderLayout.SOUTH);
-    }
-
-    private void initializeBlackboard() {
-        Blackboard bb = Blackboard.getInstance();
-        bb.setGrid(grid);
-        statusBar.registerWithBlackboard();
     }
 }

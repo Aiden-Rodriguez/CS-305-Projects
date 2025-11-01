@@ -5,10 +5,10 @@ import java.beans.PropertyChangeListener;
 
 /**
  * Status bar that displays what is happening to the user within the program.
- * Now listens to Blackboard status message changes via PropertyChangeListener.
+ * Self-registers with Blackboard and listens for status message changes.
  * @author Aiden Rodriguez - GH - Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
- * @version 1.1
+ * @version 1.2
  */
 public class StatusBar extends JPanel {
 
@@ -17,13 +17,16 @@ public class StatusBar extends JPanel {
     public StatusBar() {
         statusLabel = new JLabel("Status Bar");
         setBackground(new Color(0, 128, 128));
-        setLayout(new BorderLayout()); // Better layout
+        setLayout(new BorderLayout());
         add(statusLabel, BorderLayout.WEST);
         statusLabel.setForeground(Color.WHITE);
+
+        registerWithBlackboard();
     }
 
-    public void registerWithBlackboard() {
+    private void registerWithBlackboard() {
         Blackboard bb = Blackboard.getInstance();
+
         bb.addPropertyChangeListener("statusMessage", new PropertyChangeListener() {
             @Override
             public void propertyChange(PropertyChangeEvent evt) {

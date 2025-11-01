@@ -1,14 +1,12 @@
-import javax.swing.*;
 import java.beans.PropertyChangeListener;
 import java.beans.PropertyChangeSupport;
-import java.util.List;
 
 /**
  * Class that holds shared global variables and manages communication
  * between components using PropertyChangeSupport.
  * @author Aiden Rodriguez - GH Aiden-Rodriguez
  * @author Brandon Powell - GH - Bpowell5184
- * @version 1.2
+ * @version 1.3
  */
 public class Blackboard {
 
@@ -30,7 +28,11 @@ public class Blackboard {
 
     private final PropertyChangeSupport pcs = new PropertyChangeSupport(this);
 
-    public void setGrid(GridPanel g) {
+    /**
+     * Register the GridPanel with Blackboard.
+     * Called by GridPanel during its initialization.
+     */
+    public void registerGrid(GridPanel g) {
         this.grid = g;
     }
 
